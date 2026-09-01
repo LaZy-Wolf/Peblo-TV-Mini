@@ -1,7 +1,11 @@
 from functools import lru_cache
 from pathlib import Path
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# app/config.py -> app -> api -> repo root
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 class Settings(BaseSettings):
@@ -31,6 +35,16 @@ class Settings(BaseSettings):
 
     data_dir: Path = Path("./data")
     cors_origins: str = "http://localhost:5173,http://localhost:5174"
+
+    @field_validator("data_dir", "storage_local_root")
+    @classmethod
+    def _anchor_to_repo_root(cls, value: Path) -> Path:
+        """Resolve a relative path against the repo root, not the process CWD.
+
+        Without this, `python -m app.seed` from api/ and `uvicorn` from the
+        repo root disagree about where the data lives, and only one works.
+        """
+        return value if value.is_absolute() else (REPO_ROOT / value).resolve()
 
     @property
     def cors_origin_list(self) -> list[str]:

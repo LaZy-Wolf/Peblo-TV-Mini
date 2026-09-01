@@ -47,10 +47,11 @@ class SeedResult:
     downgraded: int = 0
 
     def summary(self) -> str:
+        rows = "row" if self.rejected == 1 else "rows"
         return (
             f"Seeded {self.shows} shows, {self.episodes} episodes, "
             f"{self.artwork} artwork records. "
-            f"{self.rejected} rows rejected, {self.downgraded} downgraded to draft."
+            f"{self.rejected} {rows} rejected, {self.downgraded} downgraded to draft."
         )
 
 

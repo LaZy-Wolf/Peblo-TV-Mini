@@ -72,14 +72,28 @@ def api(db):
 
 @pytest.fixture
 def users(db):
+    """The two seeded accounts.
+
+    Idempotent, because the seeder creates the same two emails and a test may
+    legitimately request both fixtures.
+    """
+    from sqlalchemy import select
+
     from app.auth import hash_password
     from app.models import Role, User
 
-    editor = User(email="editor@peblo.test", password_hash=hash_password("pw"), role=Role.editor)
-    admin = User(email="admin@peblo.test", password_hash=hash_password("pw"), role=Role.admin)
-    db.add_all([editor, admin])
-    db.flush()
-    return {"editor": editor, "admin": admin}
+    found = {}
+    for key, email, role in [
+        ("editor", "editor@peblo.test", Role.editor),
+        ("admin", "admin@peblo.test", Role.admin),
+    ]:
+        user = db.scalar(select(User).where(User.email == email))
+        if user is None:
+            user = User(email=email, password_hash=hash_password("pw"), role=role)
+            db.add(user)
+            db.flush()
+        found[key] = user
+    return found
 
 
 @pytest.fixture
