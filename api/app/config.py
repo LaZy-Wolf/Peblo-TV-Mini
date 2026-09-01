@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+psycopg://peblo:peblo@localhost:5432/peblo"
     test_database_url: str = "postgresql+psycopg://peblo:peblo@localhost:5432/peblo_test"
 
-    jwt_secret: str = "dev-only-change-me"
+    jwt_secret: str = "dev-only-change-me-not-for-production-use"
     jwt_expiry_hours: int = 8
     seed_editor_email: str = "editor@peblo.test"
     seed_editor_password: str = "editor-dev-password"
