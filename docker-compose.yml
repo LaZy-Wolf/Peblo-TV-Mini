@@ -66,6 +66,25 @@ services:
     ports:
       - "5174:80"
 
+  # Not started by `docker compose up`. It exists so the R2 storage backend
+  # can be exercised against a real S3 API rather than only being written.
+  # Start it with:  docker compose --profile storage-test up -d minio
+  minio:
+    image: minio/minio:latest
+    profiles: [storage-test]
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: peblo
+      MINIO_ROOT_PASSWORD: peblo-dev-secret
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
 volumes:
   pgdata:
   artwork:

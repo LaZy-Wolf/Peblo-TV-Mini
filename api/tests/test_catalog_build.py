@@ -10,7 +10,7 @@ from app.seed import seed
 def catalog(db, storage):
     seed(db, storage)
     db.flush()
-    return build_catalog(db, uuid.uuid4())
+    return build_catalog(db, uuid.uuid4(), storage)
 
 
 def _shows(catalog) -> dict:
@@ -117,8 +117,8 @@ def test_build_is_deterministic(db, storage):
     """run_id and generated_at must not affect the content hash."""
     seed(db, storage)
     db.flush()
-    first = build_catalog(db, uuid.uuid4())
-    second = build_catalog(db, uuid.uuid4())
+    first = build_catalog(db, uuid.uuid4(), storage)
+    second = build_catalog(db, uuid.uuid4(), storage)
     assert first["run_id"] != second["run_id"]
     assert content_hash(first) == content_hash(second)
 
@@ -132,7 +132,7 @@ def test_a_real_edit_changes_the_hash(db, storage):
 
     seed(db, storage)
     db.flush()
-    before = content_hash(build_catalog(db, uuid.uuid4()))
+    before = content_hash(build_catalog(db, uuid.uuid4(), storage))
     db.query(Show).filter_by(slug="curious-cubs").one().title = "Curious Cubs Returns"
     db.flush()
-    assert content_hash(build_catalog(db, uuid.uuid4())) != before
+    assert content_hash(build_catalog(db, uuid.uuid4(), storage)) != before

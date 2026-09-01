@@ -1,8 +1,14 @@
+"""Local-disk specifics and cross-backend signature parity.
+
+The shared behaviour both backends must exhibit lives in
+test_storage_contract.py, which runs the same assertions against each.
+"""
+
 import inspect
 
 import pytest
 
-from app.storage import LocalDiskStorage, ObjectNotFound, R2Storage
+from app.storage import LocalDiskStorage, R2Storage
 
 
 @pytest.fixture
@@ -10,43 +16,26 @@ def disk(tmp_path):
     return LocalDiskStorage(tmp_path, "http://example.test/media")
 
 
-def test_put_then_get_roundtrips(disk):
-    disk.put("a/b/c.jpg", b"hello", "image/jpeg")
-    assert disk.get("a/b/c.jpg") == b"hello"
-
-
-def test_put_returns_public_url(disk):
+def test_public_url_is_the_base_plus_the_key(disk):
     assert disk.put("k.jpg", b"x", "image/jpeg") == "http://example.test/media/k.jpg"
 
 
-def test_exists_reflects_reality(disk):
-    assert disk.exists("nope.jpg") is False
-    disk.put("yes.jpg", b"x", "image/jpeg")
-    assert disk.exists("yes.jpg") is True
-
-
-def test_get_missing_raises(disk):
-    with pytest.raises(ObjectNotFound):
-        disk.get("missing.jpg")
-
-
-def test_delete_is_idempotent(disk):
-    disk.put("d.jpg", b"x", "image/jpeg")
-    disk.delete("d.jpg")
-    disk.delete("d.jpg")
-    assert disk.exists("d.jpg") is False
-
-
-def test_key_cannot_escape_the_root(disk):
+def test_a_key_cannot_escape_the_storage_root(disk):
+    """Only local disk has a filesystem to escape from. S3 keys are opaque."""
     with pytest.raises(ValueError):
         disk.put("../escape.jpg", b"x", "image/jpeg")
+
+
+def test_deeply_nested_keys_create_their_directories(disk):
+    disk.put("a/b/c/d/e.jpg", b"x", "image/jpeg")
+    assert (disk.root / "a" / "b" / "c" / "d" / "e.jpg").exists()
 
 
 def test_both_backends_expose_the_same_signatures():
     """Constructed with nothing and never called, so no network.
 
-    This exists so a signature drifting apart between the two implementations
-    fails here rather than the first time someone flips STORAGE_BACKEND.
+    A signature drifting apart between the two implementations fails here
+    rather than the first time someone flips STORAGE_BACKEND in production.
     """
     for name in ("put", "get", "url", "exists", "delete"):
         local_sig = inspect.signature(getattr(LocalDiskStorage, name))

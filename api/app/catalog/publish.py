@@ -77,7 +77,7 @@ def publish(session: Session, storage: Storage, user_id: int | None) -> PublishR
         session.flush()
         raise PublishBlocked(run, asdict(report))
 
-    catalog = build_catalog(session, run_id)
+    catalog = build_catalog(session, run_id, storage)
     digest = content_hash(catalog)
     run.content_hash = digest
 

@@ -9,18 +9,17 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.models import Artwork, ContentStatus, Episode, Season, Show
 from app.reference import reference
-from app.storage import get_storage
+from app.storage.base import Storage
 
 CATALOG_VERSION = 1
 TRAILER_SEASON = 0
 
 
-def _artwork_map(records: list[Artwork]) -> dict[str, str]:
-    storage = get_storage()
+def _artwork_map(records: list[Artwork], storage: Storage) -> dict[str, str]:
     return {a.kind: storage.url(a.storage_key) for a in records}
 
 
-def _collapse(variants: list[Episode]) -> dict:
+def _collapse(variants: list[Episode], storage: Storage) -> dict:
     """Language variants of one episode become a single catalogue entry.
 
     The canonical variant is the one whose language comes first in
@@ -35,15 +34,19 @@ def _collapse(variants: list[Episode]) -> dict:
         "title": canonical.title,
         "duration_seconds": canonical.duration_seconds,
         "languages": ref.sort_languages([e.language for e in ordered]),
-        "artwork": _artwork_map(canonical.artwork),
+        "artwork": _artwork_map(canonical.artwork, storage),
     }
 
 
-def build_catalog(session: Session, run_id: uuid.UUID) -> dict:
+def build_catalog(session: Session, run_id: uuid.UUID, storage: Storage) -> dict:
     """Build the published catalogue from the database.
 
     Ordering is fully deterministic, so two runs over identical data produce
     byte identical output and the content hash is stable.
+
+    Storage is passed in rather than read from the global, so the artwork
+    URLs in the catalogue always come from the same backend the catalogue
+    file itself is written to.
     """
     ref = reference()
     shows = session.scalars(
@@ -78,7 +81,7 @@ def build_catalog(session: Session, run_id: uuid.UUID) -> dict:
                 languages.append(episode.language)
 
             entries = sorted(
-                (_collapse(v) for v in grouped.values()),
+                (_collapse(v, storage) for v in grouped.values()),
                 key=lambda e: (e["episode_number"], e["content_group"]),
             )
             if season.season_number == TRAILER_SEASON:
@@ -98,7 +101,7 @@ def build_catalog(session: Session, run_id: uuid.UUID) -> dict:
                 "synopsis": show.synopsis,
                 "categories": sorted(show.categories or []),
                 "languages": ref.sort_languages(languages),
-                "artwork": _artwork_map(show.artwork),
+                "artwork": _artwork_map(show.artwork, storage),
                 "trailers": trailers_out,
                 "seasons": seasons_out,
             }
