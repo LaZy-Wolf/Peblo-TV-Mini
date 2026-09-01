@@ -1,0 +1,22 @@
+# Normalise line endings on commit.
+* text=auto
+
+# Force LF in the working tree for files that a Linux container executes.
+#
+# entrypoint.sh runs inside the API container. With CRLF endings its shebang
+# becomes "#!/bin/sh\r" and Docker fails with "/entrypoint.sh: not found",
+# which looks like a broken image rather than a line-ending problem.
+#
+# Git for Windows sets core.autocrlf=true by default at install, so without
+# this a Windows clone would silently break `docker compose up` even though
+# the file is stored correctly in the repository.
+*.sh        text eol=lf
+Dockerfile  text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+
+# Never touch binary assets.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.webp binary
