@@ -1,0 +1,287 @@
+/* Peblo TV viewer.
+   A browse surface for a child, with a parent holding the tablet.
+   Dark cinema shell, one warm accent. Deliberately not the streaming-red
+   reflex and not the default purple. */
+
+:root {
+  --shell: oklch(0.16 0.01 260);
+  --surface: oklch(0.21 0.015 260);
+  --surface-2: oklch(0.27 0.018 260);
+  --text: oklch(0.96 0.005 260);
+  --text-muted: oklch(0.76 0.012 260);
+  --accent: oklch(0.78 0.16 65);
+  --accent-ink: oklch(0.22 0.05 65);
+
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 40px;
+  --s7: 64px;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --ease: cubic-bezier(0.23, 1, 0.32, 1);
+
+  --display: "Baloo 2", system-ui, sans-serif;
+  --body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--shell);
+  color: var(--text);
+  font: 16px/1.55 var(--body);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--display);
+  line-height: 1.15;
+  margin: 0;
+}
+h1 {
+  font-size: clamp(30px, 5vw, 54px);
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+h2 {
+  font-size: clamp(20px, 2.2vw, 26px);
+}
+h3 {
+  font-size: 17px;
+}
+p {
+  text-wrap: pretty;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  font-family: var(--display);
+  cursor: pointer;
+  border: 0;
+  border-radius: 999px;
+  padding: 12px var(--s5);
+  min-height: 44px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 700;
+  transition:
+    transform 150ms var(--ease),
+    filter 150ms var(--ease);
+}
+button:hover {
+  filter: brightness(1.07);
+}
+button:active {
+  transform: scale(0.97);
+}
+
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+input,
+select {
+  font: inherit;
+  min-height: 44px;
+  padding: 10px var(--s4);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--surface-2);
+  background: var(--surface);
+  color: var(--text);
+}
+input::placeholder {
+  color: var(--text-muted);
+}
+
+.shell {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--s5);
+}
+.muted {
+  color: var(--text-muted);
+}
+.stack > * + * {
+  margin-top: var(--s4);
+}
+.row-flex {
+  display: flex;
+  gap: var(--s3);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Space is reserved before the image lands, so nothing on the page moves as
+   artwork arrives. This is the whole answer to "stay pleasant when images
+   are slow", and it is a few lines rather than a dependency. */
+.art {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--surface) 25%, var(--surface-2) 37%, var(--surface) 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+.art.is-loaded::after {
+  display: none;
+}
+.art img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0;
+  transition: opacity 250ms var(--ease);
+}
+.art.is-loaded img {
+  opacity: 1;
+}
+.art-fallback {
+  display: grid;
+  place-items: center;
+  padding: var(--s3);
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+@keyframes shimmer {
+  to {
+    background-position: -135% 0;
+  }
+}
+
+.chip {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 5px var(--s3);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text);
+  white-space: nowrap;
+}
+.chip-accent {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.scroller {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(148px, 168px);
+  gap: var(--s4);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding-bottom: var(--s3);
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-2) transparent;
+}
+.scroller > * {
+  scroll-snap-align: start;
+}
+
+/* Hover changes colour and shadow only, never size, so the row never jitters. */
+.card {
+  display: block;
+  transition: color 150ms var(--ease);
+}
+.card .art {
+  transition: box-shadow 180ms var(--ease);
+}
+.card:hover .art {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+.card:hover h3 {
+  color: var(--accent);
+}
+
+.site-header {
+  padding: var(--s4) 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: linear-gradient(to bottom, var(--shell) 62%, transparent);
+}
+
+/* Header links are real tap targets on a tablet, so they meet the 44px
+   minimum rather than relying on their text height. */
+.site-header a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.site-header .chip {
+  padding: var(--s2) var(--s4);
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: var(--s6);
+  background: linear-gradient(
+    to top,
+    oklch(0.16 0.01 260 / 0.94) 12%,
+    oklch(0.16 0.01 260 / 0.55) 46%,
+    transparent 78%
+  );
+}
+
+.grid-cards {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--s4);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+@media (max-width: 640px) {
+  .hero-overlay {
+    padding: var(--s4);
+  }
+  .shell {
+    padding: 0 var(--s4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .art img {
+    opacity: 1;
+  }
+}
