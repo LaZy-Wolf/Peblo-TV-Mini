@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: peblo
+      POSTGRES_PASSWORD: peblo
+      POSTGRES_DB: peblo
+    # Host port is configurable so a machine that already runs Postgres on
+    # 5432 does not have to stop it to try this project.
+    ports:
+      - "${POSTGRES_HOST_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U peblo"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
