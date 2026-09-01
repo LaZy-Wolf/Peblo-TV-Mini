@@ -9,7 +9,7 @@ from app.errors import (
     api_exception_handler,
     validation_exception_handler,
 )
-from app.routers import artwork, auth, health
+from app.routers import artwork, auth, episodes, health, shows
 
 app = FastAPI(title="Peblo TV Mini API")
 app.add_middleware(
@@ -24,6 +24,8 @@ app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.include_router(health.router)
 app.include_router(auth.router)
 app.include_router(artwork.router)
+app.include_router(shows.router)
+app.include_router(episodes.router)
 
 if settings.storage_backend == "local":
     # Serves uploaded artwork in development. In production R2 serves these
