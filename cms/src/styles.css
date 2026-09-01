@@ -1,0 +1,343 @@
+/* Peblo CMS. Light, dense, high contrast.
+   Optimised for someone doing this fifty times a week: nothing decorative,
+   nothing that costs a second per repetition. */
+
+:root {
+  --ink: #16181d;
+  --ink-2: #4a5160;
+  --line: #d8dce4;
+  --line-strong: #b4bbc7;
+  --bg: #ffffff;
+  --bg-2: #f4f6f9;
+  --accent: #1d4ed8;
+  --accent-hover: #1a44bd;
+  --accent-ink: #ffffff;
+  --danger: #b42318;
+  --danger-bg: #fef3f2;
+  --warn: #8a5a00;
+  --warn-bg: #fffaeb;
+  --ok: #067647;
+  --ok-bg: #ecfdf3;
+
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+  --radius: 6px;
+  --ease: cubic-bezier(0.23, 1, 0.32, 1);
+
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-2);
+  color: var(--ink);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+h1 {
+  font-size: 24px;
+  line-height: 1.2;
+  margin: 0;
+}
+h2 {
+  font-size: 19px;
+  line-height: 1.25;
+  margin: 0;
+}
+h3 {
+  font-size: 16px;
+  line-height: 1.3;
+  margin: 0;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid var(--line-strong);
+  background: var(--bg);
+  color: var(--ink);
+  border-radius: var(--radius);
+  padding: 10px var(--s4);
+  min-height: 44px;
+  transition:
+    background-color 150ms var(--ease),
+    border-color 150ms var(--ease);
+}
+button:hover:not(:disabled) {
+  background: var(--bg-2);
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.button-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+.button-primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.button-small {
+  min-height: 34px;
+  padding: 6px var(--s3);
+  font-size: 14px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  width: 100%;
+  min-height: 44px;
+  padding: 9px var(--s3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--ink);
+}
+textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+input::placeholder {
+  color: #6b7280;
+}
+input[type="checkbox"] {
+  width: auto;
+  min-height: 0;
+  accent-color: var(--accent);
+}
+input[type="file"] {
+  padding: var(--s2);
+  cursor: pointer;
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: var(--s1);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bg);
+}
+th,
+td {
+  text-align: left;
+  padding: var(--s3);
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+th {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-2);
+  font-weight: 600;
+}
+tbody tr:hover {
+  background: var(--bg-2);
+}
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.panel {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: var(--s5);
+}
+.panel-flush {
+  padding: 0;
+  overflow: hidden;
+}
+.panel-flush > h2 {
+  padding: var(--s5) var(--s5) var(--s3);
+}
+
+.stack > * + * {
+  margin-top: var(--s4);
+}
+.stack-tight > * + * {
+  margin-top: var(--s2);
+}
+.row {
+  display: flex;
+  gap: var(--s3);
+  align-items: center;
+  flex-wrap: wrap;
+}
+.row-top {
+  align-items: flex-start;
+}
+.grow {
+  flex: 1;
+}
+.muted {
+  color: var(--ink-2);
+}
+.small {
+  font-size: 14px;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px var(--s2);
+  border-radius: 999px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.badge-published,
+.badge-success {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+.badge-draft,
+.badge-no_change {
+  background: var(--bg-2);
+  color: var(--ink-2);
+  border-color: var(--line);
+}
+.badge-failed {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+.badge-running {
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+
+.note {
+  border-radius: var(--radius);
+  padding: var(--s3) var(--s4);
+  font-size: 14px;
+  margin: 0;
+}
+.note-error {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+.note-warn {
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+.note-ok {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+.note ul {
+  margin: var(--s2) 0 0;
+  padding-left: var(--s5);
+}
+.note li + li {
+  margin-top: var(--s1);
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-2) 25%, #e9edf3 37%, var(--bg-2) 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.2s infinite linear;
+  border-radius: var(--radius);
+}
+@keyframes shimmer {
+  to {
+    background-position: -135% 0;
+  }
+}
+
+.slot-frame {
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--bg-2);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+.slot-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.site-header {
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  padding: var(--s3) var(--s5);
+}
+.site-header nav a {
+  padding: var(--s2) 0;
+  border-bottom: 2px solid transparent;
+  color: var(--ink-2);
+  font-weight: 600;
+}
+.site-header nav a:hover {
+  text-decoration: none;
+  color: var(--ink);
+}
+.site-header nav a.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.shell {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+main.shell {
+  padding: var(--s5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

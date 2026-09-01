@@ -172,7 +172,8 @@ def _show_artwork_warning(show: Show) -> Issue | None:
 def _trailer_issues(show: Show, episode: Episode) -> list[tuple[str, Issue]]:
     """Trailers need a thumbnail only. See decision D4 in the design spec."""
     kinds = {a.kind for a in episode.artwork}
-    label = f"Trailer: {episode.title}"
+    # The seed titles trailers "Trailer", so prefixing would read "Trailer: Trailer".
+    label = episode.title if "trailer" in episode.title.lower() else f"Trailer: {episode.title}"
     if "thumbnail" not in kinds:
         return [
             (

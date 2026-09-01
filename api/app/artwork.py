@@ -95,17 +95,24 @@ def validate_artwork(kind: str, data: bytes) -> ArtworkMeta:
 
     errors: list[ApiError] = []
 
-    if abs((width / height) - spec.aspect) / spec.aspect > ASPECT_TOLERANCE:
+    wrong_aspect = abs((width / height) - spec.aspect) / spec.aspect > ASPECT_TOLERANCE
+    if wrong_aspect:
         errors.append(
             ApiError("artwork_wrong_aspect", _aspect_message(spec, width, height), "file")
         )
 
-    width_off = abs(width - spec.target_w) / spec.target_w > DIMENSION_TOLERANCE
-    height_off = abs(height - spec.target_h) / spec.target_h > DIMENSION_TOLERANCE
-    if width_off or height_off:
-        errors.append(
-            ApiError("artwork_wrong_dimensions", _dimension_message(spec, width, height), "file")
-        )
+    # Only report size once the shape is right. On a rotated image the size
+    # message is derived noise ("larger than we need" for something that is
+    # also too short), and the aspect message already names the target size.
+    if not wrong_aspect:
+        width_off = abs(width - spec.target_w) / spec.target_w > DIMENSION_TOLERANCE
+        height_off = abs(height - spec.target_h) / spec.target_h > DIMENSION_TOLERANCE
+        if width_off or height_off:
+            errors.append(
+                ApiError(
+                    "artwork_wrong_dimensions", _dimension_message(spec, width, height), "file"
+                )
+            )
 
     size_kb = len(data) / 1024
     if size_kb > spec.max_kb:

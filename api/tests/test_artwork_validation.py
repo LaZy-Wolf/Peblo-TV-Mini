@@ -94,11 +94,23 @@ def test_unknown_kind_is_rejected():
 
 
 def test_all_problems_are_returned_together():
-    """An editor should fix the image once, not three times."""
+    """An editor should fix the image once, not three times.
+
+    Correct 2:3 shape, but far too large and far too heavy, so both
+    independent problems must arrive in one response.
+    """
     with pytest.raises(ApiException) as exc:
-        validate_artwork("poster", _noisy_png(900, 600))
-    assert len(exc.value.errors) >= 2
-    assert _codes(exc.value) >= {"artwork_wrong_aspect", "artwork_wrong_dimensions"}
+        validate_artwork("poster", _noisy_png(1200, 1800))
+    assert _codes(exc.value) == {"artwork_wrong_dimensions", "artwork_too_large"}
+
+
+def test_a_rotated_image_reports_shape_only():
+    """The size message on a rotated image is derived noise: it would say
+    'larger than we need' about something that is also too short. The aspect
+    message already names the target size."""
+    with pytest.raises(ApiException) as exc:
+        validate_artwork("poster", _read("poster_wrong_ratio.jpg"))
+    assert _codes(exc.value) == {"artwork_wrong_aspect"}
 
 
 def test_messages_are_written_for_a_non_technical_editor():
