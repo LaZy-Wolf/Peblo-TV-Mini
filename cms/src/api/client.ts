@@ -26,6 +26,8 @@ export class ApiError extends Error {
   }
 }
 
+export const SESSION_EXPIRED_EVENT = "peblo:session-expired";
+
 export function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
 }
@@ -67,6 +69,13 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   const data = text ? JSON.parse(text) : null;
 
   if (!response.ok) {
+    // An expired or invalid token is a session problem, not a page problem.
+    // Clear it and let the app fall back to the login screen, rather than
+    // showing "something went wrong" with a retry button that can never work.
+    if (response.status === 401 && !path.startsWith("/auth/login")) {
+      setToken(null);
+      window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
+    }
     const errors: FieldError[] = data?.errors ?? [
       { code: "unknown", message: "Something went wrong. Please try again.", field: null },
     ];

@@ -1,5 +1,5 @@
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
-import { api, getToken, setToken } from "../api/client";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { SESSION_EXPIRED_EVENT, api, getToken, setToken } from "../api/client";
 
 type Session = { email: string; role: string };
 
@@ -46,6 +46,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem(SESSION_KEY);
     setSession(null);
   }, []);
+
+  // Any 401 from the API means this session is over. Drop straight back to
+  // the login screen instead of leaving a dead page behind.
+  useEffect(() => {
+    window.addEventListener(SESSION_EXPIRED_EVENT, logout);
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, logout);
+  }, [logout]);
 
   const value = useMemo<AuthValue>(
     () => ({
