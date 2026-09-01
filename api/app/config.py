@@ -5,7 +5,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    # Read the repo root .env too, so running from api/ picks up the same
+    # file docker compose does. Later entries win.
+    model_config = SettingsConfigDict(env_file=("../.env", ".env"), extra="ignore")
 
     database_url: str = "postgresql+psycopg://peblo:peblo@localhost:5432/peblo"
     test_database_url: str = "postgresql+psycopg://peblo:peblo@localhost:5432/peblo_test"
