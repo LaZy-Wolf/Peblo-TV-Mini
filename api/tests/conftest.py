@@ -73,7 +73,6 @@ def api(db):
 @pytest.fixture
 def users(db):
     from app.auth import hash_password
-
     from app.models import Role, User
 
     editor = User(email="editor@peblo.test", password_hash=hash_password("pw"), role=Role.editor)

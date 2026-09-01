@@ -9,7 +9,6 @@ dependencies = [
     "psycopg[binary]>=3.2",
     "alembic>=1.14",
     "pydantic-settings>=2.6",
-    "email-validator>=2.2",
     "pyjwt>=2.10",
     "bcrypt>=4.2",
     "pillow>=11.0",
@@ -33,6 +32,18 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.flake8-bugbear]
+# Depends/Query/Form/File in argument defaults is FastAPI's own idiom, not
+# the mutable-default bug B008 exists to catch.
+extend-immutable-calls = [
+    "fastapi.Depends",
+    "fastapi.Query",
+    "fastapi.Form",
+    "fastapi.File",
+    "fastapi.Body",
+    "fastapi.Path",
+]
 
 [tool.ruff.lint.per-file-ignores]
 # Migration bodies are machine generated; reformatting them by hand only
