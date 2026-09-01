@@ -17,5 +17,55 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Inside the compose network the database host is the service name.
+      DATABASE_URL: postgresql+psycopg://peblo:peblo@db:5432/peblo
+      JWT_SECRET: ${JWT_SECRET:-dev-only-change-me-not-for-production-use}
+      SEED_EDITOR_EMAIL: ${SEED_EDITOR_EMAIL:-editor@peblo.test}
+      SEED_EDITOR_PASSWORD: ${SEED_EDITOR_PASSWORD:-editor-dev-password}
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-admin@peblo.test}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-admin-dev-password}
+      STORAGE_BACKEND: local
+      STORAGE_LOCAL_ROOT: /app/storage_local
+      STORAGE_PUBLIC_BASE_URL: http://localhost:8000/media
+      DATA_DIR: /app/data
+      CORS_ORIGINS: http://localhost:5173,http://localhost:5174
+    ports:
+      - "8000:8000"
+    volumes:
+      - artwork:/app/storage_local
+
+  cms:
+    build:
+      context: .
+      dockerfile: cms/Dockerfile
+      args:
+        VITE_API_BASE_URL: http://localhost:8000
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "5173:80"
+
+  viewer:
+    build:
+      context: .
+      dockerfile: viewer/Dockerfile
+      args:
+        VITE_API_BASE_URL: http://localhost:8000
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "5174:80"
+
 volumes:
   pgdata:
+  artwork:
