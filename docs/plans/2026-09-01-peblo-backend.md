@@ -1,6 +1,6 @@
 # Peblo TV Mini Backend Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> Implementation plan, written before any code.
 
 **Goal:** Build the FastAPI + PostgreSQL backend that stores shows/seasons/episodes/artwork, validates uploads, and publishes an immutable catalogue file that a viewer reads.
 

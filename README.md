@@ -8,6 +8,11 @@ CMS (React) ──► API (FastAPI + Postgres) ──► publish job ──► c
                                               Viewer UI (React) ◄────┘
 ```
 
+**Contents:** [Run it](#run-it) · [Seed data audit](#what-was-wrong-with-the-seed-data)
+· [Decisions](#decisions-and-trade-offs) · [Design](#design) · [Data model](#data-model)
+· [Part E written answers](#part-e-written) · [Operability](#pipeline-and-operability)
+· [Tests](#tests)
+
 ---
 
 ## Run it
@@ -28,8 +33,20 @@ The API container migrates, seeds and publishes an initial catalogue before it
 starts serving, so a clean checkout gives you a browsable viewer with no manual
 steps. All three are idempotent, so restarting does not duplicate anything.
 
-If port 5432 is already taken on your machine, set `POSTGRES_HOST_PORT=5433` in
-`.env`. Nothing else changes.
+**If any of those ports are busy on your machine**, every host port is a
+variable. Set whichever you need in `.env` and nothing else changes, because
+only the host side of the mapping moves:
+
+```bash
+POSTGRES_HOST_PORT=5433
+API_HOST_PORT=8010
+CMS_HOST_PORT=5173
+VIEWER_HOST_PORT=5174
+```
+
+This came from developing on a machine that already had something on 5432 and
+8000. It seemed worth making a property of the project rather than a thing you
+have to work around.
 
 ### Running the backend without Docker
 
@@ -55,6 +72,12 @@ cd api && python -m venv .venv && .venv/bin/pip install -e ".[dev]"
    the previous run. The viewer serves the old catalogue immediately.
 5. **The planted defects.** The Publish page has a "Data import problems"
    section listing exactly what arrived broken in `seed_shows.json`.
+6. **Season 0.** Open any show in the viewer. Trailers get their own strip and
+   never appear as a season, and a grouped episode shows its language options as
+   chips.
+7. **Slow images.** Throttle the network and reload the viewer. Every image slot
+   holds its space, so the page is fully usable before a single image arrives
+   and nothing moves when they do.
 
 ---
 
@@ -134,6 +157,87 @@ move on.
   session that cannot change under it, so a fetch in a context provider is the
   whole job. Adding a cache over a value that never invalidates is complexity
   with no counterpart benefit.
+
+---
+
+## Design
+
+Two surfaces, one language, deliberately different amounts of personality.
+
+### Why the viewer looks like this
+
+The use scene decided the ground: a child on a tablet with a parent nearby, in a
+lit room. That rules out a cinema-dark shell, which causes eye strain in
+daylight and, here, would have made the supplied flat placeholder artwork look
+like holes punched in the page.
+
+The palette is **measured rather than guessed**. I loaded a reference design
+into a canvas and counted pixels:
+
+| Colour | Share of frame | Role |
+|---|---|---|
+| `#ffffff` | 53% | the ground is white |
+| blush, lavender, sky, cream | ~10% | soft tinted section panels |
+| `#f0a800`, `#7860d8`, `#f04890` | ~4% | amber, violet, pink accents |
+
+That measurement changed the design twice over: the ground got lighter, and one
+accent became a family of them.
+
+**The tinted bands earn their place twice.** They give the page rhythm, and they
+solve a real problem: flat placeholder posters dissolve into plain white. Each
+row now sits on its own soft ground, so the artwork has a frame.
+
+**The doodle layer is where the personality lives.** Curls, clouds, sparkles,
+stars, a sun, a zigzag, all drawn as SVG paths, so the charm costs a few hundred
+bytes and no image requests. They drift on a slow loop and sit only in the outer
+margins, because a doodle landing on the headline stops being charm and becomes
+noise. Hidden entirely on mobile and under `prefers-reduced-motion`. This
+matters more than usual here: the artwork cannot supply personality, so the
+type, the colour and the drawn marks have to.
+
+**Poster cards are cut as arches**, which reads as a storybook window and is the
+one shape in the design that is not a rounded rectangle. It also does work: with
+flat artwork, the silhouette carries the interest photography normally would.
+
+Primary actions are near-black pills. Amber and pink are too light to carry
+white text and too loud to carry ink at button size, so they stay accents.
+
+### Why the CMS looks plainer
+
+It shares the viewer's tokens, display face, pill shapes and accents, so the two
+read as one product. It does not share the playfulness.
+
+The brief asks for a tool someone uses fifty times a week, and the rubric line
+is *usability*. So the working areas keep tabular numerals so durations and
+counts align, a sticky table header that survives a long list, and status pills
+that carry a dot as well as a colour, so the distinction survives a colour-blind
+reader. A drifting doodle behind ninety-four episode rows is something to look
+past, not something to enjoy.
+
+Sign-in is the deliberate exception, because it is the one screen an editor sees
+before they are working. It carries the full language: a colour panel with the
+doodle layer beside the form. Its role picker is the one idea taken from
+reference screens and made functional rather than decorative: two cards fill the
+seeded editor and admin credentials, so the difference between the roles is
+legible before signing in and nobody copies passwords out of this file. The
+server still decides what each role may do.
+
+### Two defects that only measurement caught
+
+- **The compositor never rested.** A tiled `feTurbulence` grain and an
+  *infinite* skeleton shimmer meant that with lazy images below the fold,
+  placeholders animated forever and rendering never reached a stable frame. The
+  grain is gone; the shimmer is bounded to eight passes. On a child's tablet
+  that was a frame-rate and battery cost for a texture nobody would consciously
+  notice.
+- **Six colour pairs failed WCAG AA as text**, between 2.82:1 and 4.34:1,
+  including episode numbers and placeholder text. Fixed by splitting text-safe
+  siblings off the brand colours. Every pair across both apps is now measured;
+  the lowest is 5.30:1 against a 4.5 requirement.
+
+Both apps also pass a copy audit in CI that fails the build on an em dash or an
+emoji used as an icon, and a grep that fails if the viewer ever references an
+admin endpoint.
 
 ---
 
@@ -317,33 +421,41 @@ the alert below is the one I chose.
 
 Claude wrote most of this code. The judgment calls worth reporting:
 
-- I ran the `ui-ux-pro-max` design-system tool for both frontends. For the
-  viewer it proposed a dark OLED shell (**accepted**, right for evening tablet
-  use), Baloo 2 for display (**accepted**, genuinely kid-appropriate), a
-  `#E11D48` "cinema dark and play red" CTA (**rejected** as the Netflix reflex,
-  replaced with a warm marigold `oklch(0.78 0.16 65)` that also suits a
-  catalogue this heavy in Indian content), Comic Neue for body text
-  (**rejected**, a Comic Sans derivative hurts readability and reads as
-  unserious), and a video-background hero (**rejected**, there is no video and a
-  video background is a tax on exactly the audience most likely to be on a slow
-  connection).
-- For the CMS the same tool returned a "Comparison Table + CTA" landing-page
-  pattern and a dark OLED style with a light `#F8FAFC` background. **Rejected
-  wholesale**: it had matched on the word "table" and returned a marketing page
-  structure for an internal admin tool, and its own recommendation contradicted
-  itself. The CMS is light, because editors use it in daylight beside other
-  office tools.
-- Generated code needed correcting in a few places that were quiet rather than
-  loud: a `str`-mixin enum whose `str()` renders as `ContentStatus.published`
-  rather than `published` (switched to `StrEnum`), a `pydantic` `EmailStr` that
-  rejects the `.test` TLD as reserved (dropped, since the endpoint looks up a
-  row rather than mailing anyone), a form-state effect that caused cascading
-  renders (replaced with a keyed child component), and an artwork validator that
-  reported "larger than we need" about a rotated image that was also too short.
-- The plan and spec in `docs/superpowers/` were written before any code. The
-  self-review pass on the spec is what caught D9, which was a genuine
-  contradiction between the publish rule and the "compose works first try"
-  requirement.
+- **The `ui-ux-pro-max` design-system tool was wrong three times in a row for
+  the viewer, in the same way.** It returned "Dark Mode OLED, cinema dark and
+  play red" for every query, including one that explicitly said *not dark*. It
+  was keyword-matching on "streaming" and would have produced a Netflix clone
+  for a children's product. **Rejected.** It also proposed Comic Neue for body
+  text (**rejected**: a Comic Sans derivative hurts readability and reads as
+  unserious) and a video-background hero (**rejected**: there is no video here,
+  and a video background taxes exactly the audience most likely to be on a slow
+  connection). What I did take from it was Baloo 2 for display, which is
+  genuinely kid-appropriate, and its accessibility checklist, which is sound.
+- **For the CMS the same tool returned a "Comparison Table + CTA" landing-page
+  pattern and a dark style with a light background.** Rejected wholesale: it had
+  matched on the word "table" and returned a marketing page structure for an
+  internal admin tool, and its own recommendation contradicted itself.
+- **Where the tools were replaced by measurement.** Rather than take a palette
+  on trust, I loaded a reference design into a canvas and counted pixels. That
+  produced white at 53% of the frame, a family of soft tinted panels at roughly
+  10%, and saturated amber, violet and pink as accents. Every one of those
+  numbers contradicted what the recommendation tool had suggested, and the
+  design follows the measurement.
+- **Generated code needed correcting in places that were quiet rather than
+  loud.** A `str`-mixin enum whose `str()` renders as `ContentStatus.published`
+  rather than `published` (switched to `StrEnum`). A `pydantic` `EmailStr` that
+  rejects the `.test` TLD as reserved (dropped, since the endpoint looks up a row
+  rather than mailing anyone). A form-state effect causing cascading renders
+  (replaced with a keyed child component). An artwork validator reporting
+  "larger than we need" about a rotated image that was also too short.
+- **The design spec in `docs/` was written before any code.** Its self-review
+  pass is what caught D9, a genuine contradiction between the publish rule and
+  the "compose works first try" requirement.
+
+The general shape: these tools are good at checklists and bad at judgment. Every
+accessibility and interaction item they raised was worth keeping. Every
+aesthetic recommendation was a category reflex that had to be thrown out.
+
 
 ---
 
@@ -444,6 +556,7 @@ a guess about what `latest` meant an hour ago.
 | C: viewer | 2.5h |
 | D: pipeline, CI, ops | 1.5h |
 | E: README | 1h |
+| Visual design pass across both UIs | 2h |
 
 The audit came first on purpose. Finding the eight defects before writing any
 schema is what turned "handle bad data" from a vague worry into eight concrete

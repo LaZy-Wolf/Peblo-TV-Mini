@@ -1,6 +1,6 @@
 # Peblo TV Mini Backend Implementation Plan, Part 2
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans. This file continues `2026-09-01-peblo-backend.md` at Task 8. Read Part 1's header and Global Constraints first, they apply here unchanged.
+> Implementation plan, written before any code.
 
 **Spec:** `docs/superpowers/specs/2026-09-01-peblo-tv-mini-design.md`
 

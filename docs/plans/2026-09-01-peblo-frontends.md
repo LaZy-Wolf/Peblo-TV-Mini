@@ -1,6 +1,6 @@
 # Peblo TV Mini Frontends Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> Implementation plan, written before any code.
 
 **Goal:** Build the internal CMS an editor uses fifty times a week, and the viewer browse UI a child uses, as two separate applications that cannot reach each other's endpoints.
 
