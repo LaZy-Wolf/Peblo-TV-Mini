@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import { ArchMark } from "./Icon";
 
 export function Layout() {
   const { email, role, logout } = useAuth();
@@ -7,8 +8,11 @@ export function Layout() {
     <>
       <header className="site-header">
         <div className="row shell">
-          <strong style={{ marginRight: "var(--s5)" }}>Peblo CMS</strong>
-          <nav className="row grow" style={{ gap: "var(--s5)" }}>
+          <span className="brand" style={{ marginRight: "var(--s5)" }}>
+            <ArchMark size={22} />
+            Peblo CMS
+          </span>
+          <nav className="row grow" style={{ gap: "var(--s2)" }}>
             <NavLink to="/shows" className={({ isActive }) => (isActive ? "active" : "")}>
               Shows
             </NavLink>

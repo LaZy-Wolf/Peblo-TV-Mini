@@ -1,31 +1,59 @@
-/* Peblo CMS. Light, dense, high contrast.
+/* Peblo CMS
+   ---------------------------------------------------------------
+   Same design language as the viewer: identical tokens, the same Baloo 2
+   display voice, the same pill shapes, the same measured accents. The two
+   surfaces are one product and should look it.
 
-   Deliberately plainer than the viewer. The brief asks for a tool someone
-   uses fifty times a week, so the work here went into scanning speed:
-   tabular numerals so durations and counts align, a sticky table header
-   that survives a long list, status that reads at a glance, and hit areas
-   that do not move under the cursor. It shares the viewer's ink, marigold
-   and peacock so the two surfaces are recognisably one product, and takes
-   none of its ornament. Decoration would cost an editor time on every
-   one of those fifty passes. */
+   What it does not inherit is the viewer's playfulness in the working
+   areas. The brief asks for a tool someone uses fifty times a week, so the
+   tables and forms stay dense and quiet: tabular numerals so durations and
+   counts align, a sticky table header that survives a long list, status
+   that reads at a glance. A drifting doodle behind ninety-four episode
+   rows is something to look past, not something to enjoy.
+
+   The sign-in screen is the exception, and deliberately so. It is the one
+   screen an editor sees before they are working, so it carries the full
+   language: the doodle layer, the colour, the welcome.
+   --------------------------------------------------------------- */
+
+@import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&display=swap");
 
 :root {
-  --ink: #241a12;
-  --ink-2: #5c4f44;
-  --line: #e3dbcf;
-  --line-strong: #c3b7a6;
-  --bg: #ffffff;
-  --bg-2: #f8f4ec;
-  --accent: #0e7c7b;
-  --accent-hover: #0a5f5e;
+  --white: #ffffff;
+  --ground: #fdfcfb;
+  --ink: #1a1626;
+  --ink-2: #5b5470;
+  --ink-faint: #6f6786;
+
+  --blush: #fff1f2;
+  --lavender: #f2f0ff;
+  --sky: #e9f4fe;
+  --cream: #fffaeb;
+  --line: #ece9f5;
+  --line-strong: #d7d2e8;
+
+  --violet: #7860d8;
+  --violet-ink: #5b41c4;
+  --amber: #f0a800;
+  --amber-ink: #8f5f04;
+  --pink: #f04890;
+  --pink-ink: #c11c62;
+  --teal: #0fa3a3;
+  --teal-ink: #0a7676;
+
+  --accent: var(--violet-ink);
   --accent-ink: #ffffff;
-  --brand: #f2a413;
+
   --danger: #a4231a;
   --danger-bg: #fdf1ef;
   --warn: #7a5000;
-  --warn-bg: #fdf6e3;
+  --warn-bg: var(--cream);
   --ok: #0a6b42;
-  --ok-bg: #edfaf1;
+  --ok-bg: #ecfaf1;
+
+  --lift-1: 0 1px 2px rgb(26 22 38 / 0.05), 0 3px 8px rgb(26 22 38 / 0.05);
+  --lift-2: 0 2px 4px rgb(26 22 38 / 0.06), 0 10px 22px rgb(26 22 38 / 0.09);
+  --lift-3: 0 4px 8px rgb(26 22 38 / 0.07), 0 20px 44px rgb(26 22 38 / 0.13);
 
   --s1: 4px;
   --s2: 8px;
@@ -33,10 +61,17 @@
   --s4: 16px;
   --s5: 24px;
   --s6: 32px;
-  --radius: 6px;
-  --ease: cubic-bezier(0.23, 1, 0.32, 1);
+  --s7: 48px;
+
+  --radius: 12px;
+  --radius-lg: 20px;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --display: "Baloo 2", ui-rounded, "Segoe UI", system-ui, sans-serif;
+  --body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
   color-scheme: light;
+  accent-color: var(--violet);
 }
 
 * {
@@ -45,132 +80,187 @@
 
 body {
   margin: 0;
-  background: var(--bg-2);
+  background: var(--ground);
   color: var(--ink);
-  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font: 16px/1.5 var(--body);
+  -webkit-font-smoothing: antialiased;
 }
 
-h1 {
-  font-size: 24px;
-  line-height: 1.2;
+::selection {
+  background: var(--amber);
+  color: var(--ink);
+}
+::placeholder {
+  color: var(--ink-faint);
+}
+* {
+  scrollbar-color: var(--line) transparent;
+  scrollbar-width: thin;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--display);
   margin: 0;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+h1 {
+  font-size: 30px;
+  font-weight: 800;
 }
 h2 {
-  font-size: 19px;
-  line-height: 1.25;
-  margin: 0;
+  font-size: 21px;
+  font-weight: 700;
 }
 h3 {
   font-size: 16px;
-  line-height: 1.3;
-  margin: 0;
+  font-weight: 700;
 }
 
 a {
-  color: var(--accent);
+  color: var(--violet-ink);
+  font-weight: 600;
   text-decoration: none;
 }
 a:hover {
   text-decoration: underline;
 }
 
+/* ---------- Buttons ---------- */
+
 button {
-  font: inherit;
+  font: 600 15px/1 var(--display);
   cursor: pointer;
-  border: 1px solid var(--line-strong);
-  background: var(--bg);
+  border: 2px solid var(--line);
+  background: var(--white);
   color: var(--ink);
-  border-radius: var(--radius);
-  padding: 10px var(--s4);
+  border-radius: 999px;
+  padding: 11px var(--s4);
   min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   transition:
-    background-color 150ms var(--ease),
-    border-color 150ms var(--ease);
+    background-color 160ms var(--ease),
+    border-color 160ms var(--ease),
+    transform 160ms var(--ease),
+    box-shadow 160ms var(--ease);
 }
 button:hover:not(:disabled) {
-  background: var(--bg-2);
+  border-color: var(--line-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--lift-1);
+}
+button:active:not(:disabled) {
+  transform: translateY(0);
 }
 button:disabled {
   cursor: not-allowed;
-  opacity: 0.55;
+  opacity: 0.5;
 }
 
 .button-primary {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: var(--ink);
+  border-color: var(--ink);
   color: var(--accent-ink);
 }
 .button-primary:hover:not(:disabled) {
-  background: var(--accent-hover);
+  background: #2b2440;
+  border-color: #2b2440;
 }
 
 .button-small {
-  min-height: 34px;
-  padding: 6px var(--s3);
+  min-height: 36px;
+  padding: 7px var(--s3);
   font-size: 14px;
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 3px solid var(--violet);
   outline-offset: 2px;
-  border-radius: 3px;
+  border-radius: var(--radius);
 }
+
+/* ---------- Form controls ---------- */
 
 input,
 select,
 textarea {
-  font: inherit;
+  font: 15px/1.4 var(--body);
   width: 100%;
-  min-height: 44px;
-  padding: 9px var(--s3);
-  border: 1px solid var(--line-strong);
+  min-height: 46px;
+  padding: 11px var(--s4);
+  border: 2px solid var(--line);
   border-radius: var(--radius);
-  background: var(--bg);
+  background: var(--white);
   color: var(--ink);
+  transition: border-color 160ms var(--ease);
+}
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: var(--line-strong);
+}
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--violet);
 }
 textarea {
-  min-height: 80px;
+  min-height: 84px;
   resize: vertical;
 }
-input::placeholder {
-  /* 4.6:1 on white. The usual placeholder gray fails. */
-  color: #78685a;
-}
-::selection {
-  background: var(--brand);
-  color: var(--ink);
+input[aria-invalid="true"] {
+  border-color: var(--danger);
 }
 input[type="checkbox"] {
   width: auto;
   min-height: 0;
-  accent-color: var(--accent);
+  accent-color: var(--violet);
 }
 input[type="file"] {
   padding: var(--s2);
+  cursor: pointer;
+  border-style: dashed;
+}
+select {
+  appearance: none;
+  padding-right: var(--s6);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%235b5470' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 5l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--s3) center;
   cursor: pointer;
 }
 
 label {
   display: block;
-  font-weight: 600;
+  font-family: var(--display);
+  font-weight: 700;
   font-size: 14px;
   margin-bottom: var(--s1);
 }
 
+/* ---------- Tables ----------
+   The dense part. Nothing decorative happens here. */
+
 table {
   width: 100%;
   border-collapse: collapse;
-  background: var(--bg);
+  background: var(--white);
   font-variant-numeric: tabular-nums;
 }
 th,
 td {
   text-align: left;
-  padding: var(--s3);
+  padding: var(--s3) var(--s4);
   border-bottom: 1px solid var(--line);
   vertical-align: middle;
 }
 th {
+  font-family: var(--display);
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -180,31 +270,34 @@ th {
   position: sticky;
   top: 0;
   z-index: 1;
-  background: var(--bg);
+  background: var(--white);
   box-shadow: inset 0 -1px 0 var(--line);
 }
 tbody tr {
   transition: background-color 120ms var(--ease);
 }
 tbody tr:hover {
-  background: var(--bg-2);
+  background: var(--lavender);
 }
 tbody tr:last-child td {
   border-bottom: 0;
 }
 
+/* ---------- Panels ---------- */
+
 .panel {
-  background: var(--bg);
+  background: var(--white);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   padding: var(--s5);
+  box-shadow: var(--lift-1);
 }
 .panel-flush {
   padding: 0;
   overflow: hidden;
 }
 .panel-flush > h2 {
-  padding: var(--s5) var(--s5) var(--s3);
+  padding: var(--s5) var(--s5) var(--s4);
 }
 
 .stack > * + * {
@@ -231,20 +324,24 @@ tbody tr:last-child td {
 .small {
   font-size: 14px;
 }
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Status ---------- */
 
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  font-family: var(--display);
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.01em;
-  padding: 3px var(--s2) 3px 7px;
+  padding: 4px var(--s3) 4px 9px;
   border-radius: 999px;
-  border: 1px solid transparent;
   white-space: nowrap;
 }
-/* Colour is never the only signal: each state also carries a dot, so the
+/* Colour is never the only signal: each state carries a dot too, so the
    distinction survives a colour-blind reader and a bad monitor. */
 .badge::before {
   content: "";
@@ -261,9 +358,8 @@ tbody tr:last-child td {
 }
 .badge-draft,
 .badge-no_change {
-  background: var(--bg-2);
+  background: var(--lavender);
   color: var(--ink-2);
-  border-color: var(--line);
 }
 .badge-failed {
   background: var(--danger-bg);
@@ -301,9 +397,9 @@ tbody tr:last-child td {
 }
 
 .skeleton {
-  background: linear-gradient(90deg, var(--bg-2) 25%, #efe7d9 37%, var(--bg-2) 63%);
+  background: linear-gradient(90deg, var(--line) 25%, #f6f4fc 37%, var(--line) 63%);
   background-size: 400% 100%;
-  animation: shimmer 1.2s infinite linear;
+  animation: shimmer 1.2s linear 8 both;
   border-radius: var(--radius);
 }
 @keyframes shimmer {
@@ -313,9 +409,9 @@ tbody tr:last-child td {
 }
 
 .slot-frame {
-  border: 1px dashed var(--line-strong);
+  border: 2px dashed var(--line-strong);
   border-radius: var(--radius);
-  background: var(--bg-2);
+  background: var(--lavender);
   overflow: hidden;
   display: grid;
   place-items: center;
@@ -339,33 +435,192 @@ tbody tr:last-child td {
   border: 0;
 }
 
+/* ---------- Shell ---------- */
+
 .site-header {
-  background: var(--bg);
+  background: var(--white);
   border-bottom: 1px solid var(--line);
   padding: var(--s3) var(--s5);
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 19px;
+  letter-spacing: -0.03em;
+  color: var(--ink);
 }
 .site-header nav a {
-  padding: var(--s2) 0;
-  border-bottom: 2px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 var(--s4);
+  border-radius: 999px;
   color: var(--ink-2);
-  font-weight: 600;
+  font-family: var(--display);
+  font-weight: 700;
+  transition:
+    background-color 160ms var(--ease),
+    color 160ms var(--ease);
 }
 .site-header nav a:hover {
   text-decoration: none;
   color: var(--ink);
+  background: var(--lavender);
 }
 .site-header nav a.active {
-  color: var(--accent);
-  border-bottom-color: var(--accent);
+  color: var(--white);
+  background: var(--ink);
 }
 
 .shell {
-  max-width: 1200px;
+  max-width: 1240px;
   margin: 0 auto;
 }
-
 main.shell {
   padding: var(--s5);
+}
+
+/* ---------- Sign in ----------
+   The one screen that carries the viewer's full language: a colour panel
+   with the doodle layer on the left, the form on the right. */
+
+.login {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--ground);
+}
+
+.login-art {
+  position: relative;
+  overflow: hidden;
+  background: var(--lavender);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--s7);
+  gap: var(--s4);
+}
+.login-art h1 {
+  font-size: clamp(32px, 3.4vw, 46px);
+  max-width: 14ch;
+  position: relative;
+  z-index: 2;
+}
+.login-art p {
+  margin: 0;
+  max-width: 40ch;
+  position: relative;
+  z-index: 2;
+  color: var(--ink-2);
+}
+.login-badge {
+  position: relative;
+  z-index: 2;
+  display: inline-grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 999px 999px 14px 14px;
+  background: var(--white);
+  box-shadow: var(--lift-1);
+}
+
+.login-form {
+  display: grid;
+  place-content: center;
+  padding: var(--s7) var(--s5);
+}
+.login-card {
+  width: min(400px, 100%);
+}
+
+/* Role picker. The seeded accounts, one tap each, because a reviewer
+   should not have to copy credentials out of a README. The server still
+   decides what the role can do; this only fills the form. */
+.role-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s3);
+}
+.role {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: var(--s3) var(--s4);
+  border-radius: var(--radius);
+  border: 2px solid var(--line);
+  background: var(--white);
+  cursor: pointer;
+  text-align: left;
+  min-height: 0;
+  font-family: var(--body);
+}
+.role[aria-pressed="true"] {
+  border-color: var(--violet);
+  background: var(--lavender);
+}
+.role strong {
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 700;
+}
+.role span {
+  font-size: 12px;
+  color: var(--ink-2);
+  line-height: 1.35;
+}
+
+.login-foot {
+  text-align: center;
+  font-size: 14px;
+  margin-top: var(--s5);
+}
+
+@media (max-width: 900px) {
+  .login {
+    grid-template-columns: 1fr;
+  }
+  .login-art {
+    padding: var(--s6) var(--s5);
+    min-height: auto;
+  }
+  .login-art .doodles {
+    display: none;
+  }
+  .login-form {
+    padding: var(--s6) var(--s5);
+  }
+}
+
+/* ---------- Doodles (sign-in only) ---------- */
+
+.doodles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+.doodle {
+  position: absolute;
+  opacity: 0.85;
+  animation: drift 9s ease-in-out infinite alternate;
+}
+@keyframes drift {
+  from {
+    transform: translate3d(0, 0, 0) rotate(-3deg);
+  }
+  to {
+    transform: translate3d(0, -12px, 0) rotate(3deg);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -376,58 +631,14 @@ main.shell {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+  .doodle {
+    animation: none;
+  }
 }
 
-/* ---------- Sign in ----------
-   The front door is the one CMS surface that carries a little of the
-   viewer's warmth, because it is the only screen an editor sees before
-   they are working. Everything past it goes back to being a tool. */
-
-.login {
-  min-height: 100vh;
-  display: grid;
-  place-content: center;
-  gap: var(--s5);
-  padding: var(--s5);
-  background:
-    radial-gradient(60rem 30rem at 50% -12%, #fdf3df 0%, transparent 70%),
-    var(--bg-2);
-}
-
-.login-card {
-  width: min(420px, 100%);
-  background: var(--bg);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: var(--s6) var(--s5) var(--s5);
-  box-shadow:
-    0 1px 2px rgb(74 48 20 / 0.05),
-    0 12px 32px rgb(74 48 20 / 0.09);
-}
-
-.login-mark {
-  display: inline-grid;
-  place-items: center;
-  width: 52px;
-  height: 52px;
-  border-radius: 999px 999px 12px 12px;
-  background: var(--bg-2);
-  border: 1px solid var(--line);
-  margin-bottom: var(--s4);
-}
-
-.login-card h1 {
-  font-size: 27px;
-  letter-spacing: -0.02em;
-}
-
-.login-foot {
-  text-align: center;
-  font-size: 14px;
-}
-
+/* A login form has one action; it should span the form. */
 .login-card form button[type="submit"] {
   width: 100%;
-  justify-content: center;
-  font-weight: 600;
+  min-height: 50px;
+  font-size: 16px;
 }
