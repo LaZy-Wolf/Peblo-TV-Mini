@@ -6,3 +6,5 @@ __pycache__/
 storage_local/
 dist/
 *.egg-info/
+# Local editor and agent tooling config, not part of the project.
+.claude/
