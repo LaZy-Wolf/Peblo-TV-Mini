@@ -1,3 +1,5 @@
+import { Icon } from "./Icon";
+
 export function Empty({
   title,
   message,
@@ -8,11 +10,25 @@ export function Empty({
   action?: React.ReactNode;
 }) {
   return (
-    <div style={{ padding: "var(--s7) var(--s5)", textAlign: "center" }}>
+    <div className="state">
+      <span
+        aria-hidden="true"
+        style={{
+          display: "inline-grid",
+          placeItems: "center",
+          width: 64,
+          height: 64,
+          borderRadius: "999px 999px 16px 16px",
+          background: "var(--paper-raised)",
+          boxShadow: "var(--lift-1)",
+          color: "var(--ink-faint)",
+          marginBottom: "var(--s4)",
+        }}
+      >
+        <Icon name="empty" size={26} />
+      </span>
       <h2>{title}</h2>
-      <p className="muted" style={{ maxWidth: "44ch", margin: "var(--s3) auto 0" }}>
-        {message}
-      </p>
+      <p className="muted">{message}</p>
       {action && <div style={{ marginTop: "var(--s5)" }}>{action}</div>}
     </div>
   );

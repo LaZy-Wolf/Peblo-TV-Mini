@@ -28,3 +28,21 @@ export function Icon({ name, label }: { name: IconName; label?: string }) {
     </svg>
   );
 }
+
+
+/** The Peblo arch, shared with the viewer so the two surfaces read as one
+ *  product. The only ornament the CMS gets. */
+export function ArchMark({ size = 24 }: { size?: number }) {
+  return (
+    <svg viewBox="0 0 24 26" width={size} height={size} aria-hidden="true">
+      <path
+        d="M3 25V12a9 9 0 0 1 18 0v13"
+        fill="#f2a413"
+        stroke="#2a1d12"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <circle cx="12" cy="11" r="2.4" fill="#2a1d12" />
+    </svg>
+  );
+}

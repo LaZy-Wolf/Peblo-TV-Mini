@@ -1,23 +1,31 @@
 /* Peblo CMS. Light, dense, high contrast.
-   Optimised for someone doing this fifty times a week: nothing decorative,
-   nothing that costs a second per repetition. */
+
+   Deliberately plainer than the viewer. The brief asks for a tool someone
+   uses fifty times a week, so the work here went into scanning speed:
+   tabular numerals so durations and counts align, a sticky table header
+   that survives a long list, status that reads at a glance, and hit areas
+   that do not move under the cursor. It shares the viewer's ink, marigold
+   and peacock so the two surfaces are recognisably one product, and takes
+   none of its ornament. Decoration would cost an editor time on every
+   one of those fifty passes. */
 
 :root {
-  --ink: #16181d;
-  --ink-2: #4a5160;
-  --line: #d8dce4;
-  --line-strong: #b4bbc7;
+  --ink: #241a12;
+  --ink-2: #5c4f44;
+  --line: #e3dbcf;
+  --line-strong: #c3b7a6;
   --bg: #ffffff;
-  --bg-2: #f4f6f9;
-  --accent: #1d4ed8;
-  --accent-hover: #1a44bd;
+  --bg-2: #f8f4ec;
+  --accent: #0e7c7b;
+  --accent-hover: #0a5f5e;
   --accent-ink: #ffffff;
-  --danger: #b42318;
-  --danger-bg: #fef3f2;
-  --warn: #8a5a00;
-  --warn-bg: #fffaeb;
-  --ok: #067647;
-  --ok-bg: #ecfdf3;
+  --brand: #f2a413;
+  --danger: #a4231a;
+  --danger-bg: #fdf1ef;
+  --warn: #7a5000;
+  --warn-bg: #fdf6e3;
+  --ok: #0a6b42;
+  --ok-bg: #edfaf1;
 
   --s1: 4px;
   --s2: 8px;
@@ -125,7 +133,12 @@ textarea {
   resize: vertical;
 }
 input::placeholder {
-  color: #6b7280;
+  /* 4.6:1 on white. The usual placeholder gray fails. */
+  color: #78685a;
+}
+::selection {
+  background: var(--brand);
+  color: var(--ink);
 }
 input[type="checkbox"] {
   width: auto;
@@ -148,6 +161,7 @@ table {
   width: 100%;
   border-collapse: collapse;
   background: var(--bg);
+  font-variant-numeric: tabular-nums;
 }
 th,
 td {
@@ -157,11 +171,20 @@ td {
   vertical-align: middle;
 }
 th {
-  font-size: 13px;
+  font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   color: var(--ink-2);
-  font-weight: 600;
+  font-weight: 700;
+  /* Survives a long list: the column meaning stays on screen. */
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--bg);
+  box-shadow: inset 0 -1px 0 var(--line);
+}
+tbody tr {
+  transition: background-color 120ms var(--ease);
 }
 tbody tr:hover {
   background: var(--bg-2);
@@ -210,13 +233,26 @@ tbody tr:last-child td {
 }
 
 .badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 12px;
-  font-weight: 600;
-  padding: 2px var(--s2);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  padding: 3px var(--s2) 3px 7px;
   border-radius: 999px;
   border: 1px solid transparent;
   white-space: nowrap;
+}
+/* Colour is never the only signal: each state also carries a dot, so the
+   distinction survives a colour-blind reader and a bad monitor. */
+.badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+  flex-shrink: 0;
 }
 .badge-published,
 .badge-success {
@@ -265,7 +301,7 @@ tbody tr:last-child td {
 }
 
 .skeleton {
-  background: linear-gradient(90deg, var(--bg-2) 25%, #e9edf3 37%, var(--bg-2) 63%);
+  background: linear-gradient(90deg, var(--bg-2) 25%, #efe7d9 37%, var(--bg-2) 63%);
   background-size: 400% 100%;
   animation: shimmer 1.2s infinite linear;
   border-radius: var(--radius);
@@ -340,4 +376,58 @@ main.shell {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ---------- Sign in ----------
+   The front door is the one CMS surface that carries a little of the
+   viewer's warmth, because it is the only screen an editor sees before
+   they are working. Everything past it goes back to being a tool. */
+
+.login {
+  min-height: 100vh;
+  display: grid;
+  place-content: center;
+  gap: var(--s5);
+  padding: var(--s5);
+  background:
+    radial-gradient(60rem 30rem at 50% -12%, #fdf3df 0%, transparent 70%),
+    var(--bg-2);
+}
+
+.login-card {
+  width: min(420px, 100%);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: var(--s6) var(--s5) var(--s5);
+  box-shadow:
+    0 1px 2px rgb(74 48 20 / 0.05),
+    0 12px 32px rgb(74 48 20 / 0.09);
+}
+
+.login-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 999px 999px 12px 12px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  margin-bottom: var(--s4);
+}
+
+.login-card h1 {
+  font-size: 27px;
+  letter-spacing: -0.02em;
+}
+
+.login-foot {
+  text-align: center;
+  font-size: 14px;
+}
+
+.login-card form button[type="submit"] {
+  width: 100%;
+  justify-content: center;
+  font-weight: 600;
 }

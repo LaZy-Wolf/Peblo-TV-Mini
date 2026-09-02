@@ -1,16 +1,55 @@
-/* Peblo TV viewer.
-   A browse surface for a child, with a parent holding the tablet.
-   Dark cinema shell, one warm accent. Deliberately not the streaming-red
-   reflex and not the default purple. */
+/* Peblo TV, "Paper theatre"
+   ---------------------------------------------------------------
+   A browse surface for a child with a parent nearby, used on a tablet
+   in a lit room. So: warm parchment, not cinema black. Eye strain was
+   the explicit constraint, and a dark shell would also have made the
+   supplied flat artwork look like holes in the page.
+
+   Depth is cut paper. Every raised plane carries a real offset and a
+   soft blur, the way stacked paper actually casts light. Nothing here
+   uses a zero-offset glow.
+
+   The arch is a jharokha, the cusped window of Indian architecture.
+   The catalogue is Moti reborn across India and Banyan Dadi telling
+   folk tales under a banyan tree, so the motif belongs to the content
+   rather than being applied to it. It also does real work: the
+   supplied artwork is flat placeholder colour, so the silhouette has
+   to carry the interest that photography normally would.
+   --------------------------------------------------------------- */
+
+@import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap");
 
 :root {
-  --shell: oklch(0.16 0.01 260);
-  --surface: oklch(0.21 0.015 260);
-  --surface-2: oklch(0.27 0.018 260);
-  --text: oklch(0.96 0.005 260);
-  --text-muted: oklch(0.76 0.012 260);
-  --accent: oklch(0.78 0.16 65);
-  --accent-ink: oklch(0.22 0.05 65);
+  /* Ground and paper planes */
+  --paper: #fbf2e2;
+  --paper-raised: #fffcf5;
+  --paper-sunk: #f3e7d1;
+  --paper-edge: #e6d5b8;
+
+  /* Ink, warm rather than neutral, so it sits on parchment */
+  --ink: #2a1d12;
+  --ink-soft: #6d5946;
+  --ink-faint: #826e5b;
+
+  /* Festival palette */
+  --marigold: #f2a413;
+  --marigold-deep: #d4870a;
+  --peacock: #0e7c7b;
+  --peacock-deep: #0a5f5e;
+  --terracotta: #c4562f;
+  --indigo: #453b8f;
+
+  /* Text-safe siblings of the two brightest brand colours. The bright
+     versions stay for fills, where the ink on top carries the contrast;
+     these are the only ones allowed to be text on paper. Measured, not
+     eyeballed: 5.02:1 and 5.90:1 on --paper-raised. */
+  --amber-ink: #9a6105;
+  --terracotta-ink: #a54524;
+
+  /* Cut-paper depth. Offset plus blur, always. */
+  --lift-1: 0 1px 2px rgb(74 48 20 / 0.07), 0 3px 8px rgb(74 48 20 / 0.07);
+  --lift-2: 0 2px 4px rgb(74 48 20 / 0.09), 0 10px 22px rgb(74 48 20 / 0.13);
+  --lift-3: 0 3px 6px rgb(74 48 20 / 0.1), 0 20px 44px rgb(74 48 20 / 0.18);
 
   --s1: 4px;
   --s2: 8px;
@@ -19,48 +58,90 @@
   --s5: 24px;
   --s6: 40px;
   --s7: 64px;
-  --radius: 12px;
-  --radius-sm: 8px;
-  --ease: cubic-bezier(0.23, 1, 0.32, 1);
+  --s8: 96px;
 
-  --display: "Baloo 2", system-ui, sans-serif;
-  --body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 24px;
 
-  color-scheme: dark;
+  /* Exponential ease-out. Everything decelerates into place. */
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-soft: cubic-bezier(0.33, 1, 0.68, 1);
+
+  --display: "Baloo 2", ui-rounded, "Segoe UI", system-ui, sans-serif;
+  --body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  color-scheme: light;
+  accent-color: var(--peacock);
 }
 
 * {
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
-  background: var(--shell);
-  color: var(--text);
-  font: 16px/1.55 var(--body);
+  color: var(--ink);
+  font: 16px/1.6 var(--body);
+  background-color: var(--paper);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Paper texture was tried here as a tiled feTurbulence SVG and removed.
+   Measured, it stalled painting outright: an SVG filter rasterised across
+   the viewport is expensive whether it sits on the body background or on
+   a fixed layer. The materiality this design needs comes from the warm
+   ground, the cut-paper shadows and the arch silhouette, none of which
+   cost a frame. A texture that costs frames on a child's tablet is not a
+   texture worth having. */
+
+/* Browser surfaces belong to the design too. */
+::selection {
+  background: var(--marigold);
+  color: var(--ink);
+}
+::placeholder {
+  color: var(--ink-faint);
+}
+:focus-visible {
+  outline: 3px solid var(--peacock);
+  outline-offset: 3px;
+  border-radius: var(--r-sm);
+}
+* {
+  scrollbar-color: var(--paper-edge) transparent;
+  scrollbar-width: thin;
 }
 
 h1,
 h2,
 h3 {
   font-family: var(--display);
-  line-height: 1.15;
   margin: 0;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
 }
 h1 {
-  font-size: clamp(30px, 5vw, 54px);
-  letter-spacing: -0.02em;
+  font-size: clamp(34px, 5.6vw, 68px);
+  font-weight: 800;
   text-wrap: balance;
 }
 h2 {
-  font-size: clamp(20px, 2.2vw, 26px);
+  font-size: clamp(22px, 2.6vw, 32px);
+  font-weight: 700;
 }
 h3 {
   font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
 }
 p {
   text-wrap: pretty;
+  margin: 0;
 }
 
 a {
@@ -68,58 +149,97 @@ a {
   text-decoration: none;
 }
 
-button {
-  font: inherit;
-  font-family: var(--display);
+/* Numbers that line up: durations, episode numbers, counts. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Buttons ---------- */
+
+button,
+.btn {
+  font: 600 16px/1 var(--display);
   cursor: pointer;
   border: 0;
   border-radius: 999px;
-  padding: 12px var(--s5);
-  min-height: 44px;
-  background: var(--accent);
-  color: var(--accent-ink);
-  font-weight: 700;
+  padding: 14px var(--s5);
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  background: var(--marigold);
+  color: var(--ink);
+  box-shadow: var(--lift-1);
   transition:
-    transform 150ms var(--ease),
-    filter 150ms var(--ease);
+    transform 220ms var(--ease),
+    box-shadow 220ms var(--ease),
+    background-color 220ms var(--ease);
 }
-button:hover {
-  filter: brightness(1.07);
+button:hover,
+.btn:hover {
+  background: var(--marigold-deep);
+  transform: translateY(-2px);
+  box-shadow: var(--lift-2);
 }
-button:active {
-  transform: scale(0.97);
+button:active,
+.btn:active {
+  transform: translateY(0);
+  box-shadow: var(--lift-1);
 }
 
-:focus-visible {
-  outline: 3px solid var(--accent);
-  outline-offset: 3px;
-  border-radius: var(--radius-sm);
+.btn-quiet {
+  background: var(--paper-raised);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1.5px var(--paper-edge);
 }
+.btn-quiet:hover {
+  background: var(--paper-raised);
+  box-shadow:
+    inset 0 0 0 1.5px var(--ink-faint),
+    var(--lift-1);
+}
+
+/* ---------- Form controls ---------- */
 
 input,
 select {
-  font: inherit;
-  min-height: 44px;
-  padding: 10px var(--s4);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--surface-2);
-  background: var(--surface);
-  color: var(--text);
+  font: 15px/1 var(--body);
+  min-height: 48px;
+  padding: 0 var(--s4);
+  border-radius: 999px;
+  border: 1.5px solid var(--paper-edge);
+  background: var(--paper-raised);
+  color: var(--ink);
+  transition:
+    border-color 200ms var(--ease),
+    box-shadow 200ms var(--ease);
 }
-input::placeholder {
-  color: var(--text-muted);
+input:hover,
+select:hover {
+  border-color: var(--ink-faint);
+}
+input:focus,
+select:focus {
+  border-color: var(--peacock);
+}
+select {
+  appearance: none;
+  padding-right: var(--s6);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%236d5946' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 5l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--s4) center;
+  cursor: pointer;
 }
 
+/* ---------- Layout ---------- */
+
 .shell {
-  max-width: 1400px;
+  max-width: 1360px;
   margin: 0 auto;
   padding: 0 var(--s5);
 }
 .muted {
-  color: var(--text-muted);
-}
-.stack > * + * {
-  margin-top: var(--s4);
+  color: var(--ink-soft);
 }
 .row-flex {
   display: flex;
@@ -127,23 +247,102 @@ input::placeholder {
   align-items: center;
   flex-wrap: wrap;
 }
+.stack > * + * {
+  margin-top: var(--s5);
+}
 
-/* Space is reserved before the image lands, so nothing on the page moves as
-   artwork arrives. This is the whole answer to "stay pleasant when images
-   are slow", and it is a few lines rather than a dependency. */
+/* ---------- Header ---------- */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding: var(--s4) 0;
+  /* Solid, not glass. Paper does not blur what is behind it, and a
+     backdrop-filter on a sticky element smears during repaint. */
+  background: var(--paper);
+  border-bottom: 1px solid transparent;
+  transition:
+    border-color 300ms var(--ease),
+    box-shadow 300ms var(--ease);
+}
+.site-header[data-scrolled="true"] {
+  border-bottom-color: var(--paper-edge);
+  box-shadow: 0 6px 18px rgb(74 48 20 / 0.05);
+}
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 21px;
+  letter-spacing: -0.02em;
+  min-height: 44px;
+}
+.wordmark svg {
+  overflow: visible;
+}
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 var(--s4);
+  border-radius: 999px;
+  font-weight: 600;
+  font-family: var(--display);
+  color: var(--ink);
+  background: var(--paper-raised);
+  box-shadow: inset 0 0 0 1.5px var(--paper-edge);
+  transition:
+    background-color 200ms var(--ease),
+    box-shadow 200ms var(--ease),
+    transform 200ms var(--ease);
+}
+.nav-link:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 0 0 1.5px var(--ink-faint),
+    var(--lift-1);
+}
+.nav-link.active {
+  background: var(--peacock);
+  color: #fff;
+  box-shadow: none;
+}
+
+/* ---------- Artwork ---------- */
+
 .art {
   position: relative;
   overflow: hidden;
-  border-radius: var(--radius);
-  background: var(--surface);
+  background: var(--paper-sunk);
+  border-radius: var(--r-md);
+}
+/* The jharokha arch. A full dome on top, squared at the base, so a
+   poster reads as a lit niche rather than as another rounded card. */
+.art-arch {
+  border-radius: 999px 999px var(--r-md) var(--r-md);
 }
 .art::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, var(--surface) 25%, var(--surface-2) 37%, var(--surface) 63%);
-  background-size: 400% 100%;
-  animation: shimmer 1.4s infinite linear;
+  background: linear-gradient(
+    100deg,
+    var(--paper-sunk) 20%,
+    var(--paper-edge) 42%,
+    var(--paper-sunk) 64%
+  );
+  background-size: 300% 100%;
+  /* Bounded, not infinite. Lazy images below the fold never load until
+     scrolled to, so an infinite shimmer meant a page full of placeholders
+     animating forever: the compositor never rests, and rendering never
+     reaches a stable frame. Eight passes is roughly thirteen seconds,
+     long enough to signal loading on a genuinely slow connection, after
+     which the placeholder settles into a calm tint. */
+  animation: sweep 1.6s linear 8 both;
 }
 .art.is-loaded::after {
   display: none;
@@ -156,7 +355,7 @@ input::placeholder {
   object-fit: cover;
   display: block;
   opacity: 0;
-  transition: opacity 250ms var(--ease);
+  transition: opacity 420ms var(--ease);
 }
 .art.is-loaded img {
   opacity: 1;
@@ -164,122 +363,299 @@ input::placeholder {
 .art-fallback {
   display: grid;
   place-items: center;
-  padding: var(--s3);
+  padding: var(--s4);
   text-align: center;
-  font-size: 13px;
-  color: var(--text-muted);
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink-soft);
+  background:
+    radial-gradient(circle at 50% 34%, var(--paper-edge), transparent 62%),
+    var(--paper-sunk);
 }
-@keyframes shimmer {
+@keyframes sweep {
   to {
-    background-position: -135% 0;
+    background-position: -300% 0;
   }
 }
 
-.chip {
-  display: inline-block;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 5px var(--s3);
-  border-radius: 999px;
-  background: var(--surface-2);
-  color: var(--text);
-  white-space: nowrap;
+/* ---------- Poster cards ---------- */
+
+.card {
+  display: block;
+  position: relative;
 }
-.chip-accent {
-  background: var(--accent);
-  color: var(--accent-ink);
+.card .art {
+  box-shadow: var(--lift-1);
+  transition:
+    transform 340ms var(--ease),
+    box-shadow 340ms var(--ease);
+}
+.card:hover .art,
+.card:focus-visible .art {
+  transform: translateY(-8px);
+  box-shadow: var(--lift-3);
+}
+.card h3 {
+  margin-top: var(--s3);
+  transition: color 200ms var(--ease);
+}
+.card:hover h3 {
+  color: var(--terracotta-ink);
+}
+.card-meta {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-top: 2px;
 }
 
+/* ---------- Rows ---------- */
+
+.row-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s3);
+  margin-bottom: var(--s4);
+}
+/* A drawn rule rather than a border, so section breaks feel inked. */
+.row-rule {
+  flex: 1;
+  height: 2px;
+  border-radius: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--paper-edge) 0 10px,
+    transparent 10px 18px
+  );
+}
 .scroller {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: minmax(148px, 168px);
-  gap: var(--s4);
+  grid-auto-columns: minmax(158px, 186px);
+  gap: var(--s5);
   overflow-x: auto;
   scroll-snap-type: x proximity;
-  padding-bottom: var(--s3);
-  scrollbar-width: thin;
-  scrollbar-color: var(--surface-2) transparent;
+  padding: var(--s2) var(--s1) var(--s6);
+  margin: 0 calc(var(--s1) * -1);
+  scroll-padding-left: var(--s1);
 }
 .scroller > * {
   scroll-snap-align: start;
 }
 
-/* Hover changes colour and shadow only, never size, so the row never jitters. */
-.card {
-  display: block;
-  transition: color 150ms var(--ease);
-}
-.card .art {
-  transition: box-shadow 180ms var(--ease);
-}
-.card:hover .art {
-  box-shadow: 0 0 0 2px var(--accent);
-}
-.card:hover h3 {
-  color: var(--accent);
-}
+/* ---------- Chips ---------- */
 
-.site-header {
-  padding: var(--s4) 0;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: linear-gradient(to bottom, var(--shell) 62%, transparent);
-}
-
-/* Header links are real tap targets on a tablet, so they meet the 44px
-   minimum rather than relying on their text height. */
-.site-header a {
+.chip {
   display: inline-flex;
   align-items: center;
-  min-height: 44px;
+  gap: 5px;
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px var(--s3);
+  border-radius: 999px;
+  background: var(--paper-raised);
+  color: var(--ink-soft);
+  box-shadow: inset 0 0 0 1.5px var(--paper-edge);
+  white-space: nowrap;
 }
-.site-header .chip {
-  padding: var(--s2) var(--s4);
+.chip-lang {
+  background: color-mix(in oklab, var(--peacock) 12%, var(--paper-raised));
+  color: var(--peacock-deep);
+  box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--peacock) 26%, transparent);
+}
+.chip-solid {
+  background: var(--ink);
+  color: var(--paper);
+  box-shadow: none;
 }
 
-.hero-overlay {
+/* ---------- Hero ---------- */
+
+.hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 44%);
+  align-items: center;
+  gap: var(--s7);
+  padding: var(--s7) var(--s7) var(--s7) var(--s6);
+  margin-top: var(--s5);
+  border-radius: var(--r-lg);
+  background: var(--paper-raised);
+  box-shadow: var(--lift-2);
+  overflow: hidden;
+}
+/* A Gond-inflected field of dots, drawn rather than imported, sitting
+   behind the hero the way pattern sits behind a stage. */
+.hero::before {
+  content: "";
   position: absolute;
   inset: 0;
+  background-image: radial-gradient(var(--paper-edge) 1.5px, transparent 1.6px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(ellipse 70% 90% at 88% 50%, #000 10%, transparent 72%);
+  pointer-events: none;
+}
+.hero-copy {
+  position: relative;
   z-index: 2;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: var(--s6);
-  background: linear-gradient(
-    to top,
-    oklch(0.16 0.01 260 / 0.94) 12%,
-    oklch(0.16 0.01 260 / 0.55) 46%,
-    transparent 78%
-  );
+  /* No measure on the column: a 34ch cap is a body-text measure and it
+     strangles a display headline into a narrow ragged stack. The measure
+     belongs on the paragraph, below. */
+}
+.hero-copy p {
+  max-width: 46ch;
+}
+.hero-art {
+  position: relative;
+  z-index: 2;
+  padding: var(--s3);
+  border-radius: var(--r-lg);
+  background: var(--paper);
+  box-shadow: var(--lift-3);
+  transform: rotate(-1.1deg);
+}
+.hero-art .art {
+  border-radius: var(--r-md);
+}
+/* A pin holding the picture to the board. */
+.hero-art::after {
+  content: "";
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  transform: translateX(-50%);
+  background: var(--terracotta);
+  box-shadow: var(--lift-1);
 }
 
-.grid-cards {
+@media (max-width: 900px) {
+  .hero {
+    grid-template-columns: 1fr;
+    padding: var(--s5);
+    gap: var(--s5);
+  }
+  /* Stacked, the dot field would sit behind the paragraph. Move it up
+     behind the artwork where it belongs. */
+  .hero::before {
+    mask-image: radial-gradient(ellipse 100% 46% at 50% 12%, #000 10%, transparent 78%);
+  }
+  .hero-art {
+    transform: none;
+  }
+  .hero-copy {
+    max-width: none;
+    order: 2;
+  }
+  .hero-art {
+    order: 1;
+  }
+}
+
+/* ---------- Episode list ---------- */
+
+.ep-grid {
   list-style: none;
   padding: 0;
   margin: 0;
   display: grid;
   gap: var(--s4);
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+}
+.ep {
+  display: flex;
+  gap: var(--s4);
+  align-items: flex-start;
+  padding: var(--s3);
+  border-radius: var(--r-md);
+  background: var(--paper-raised);
+  box-shadow: var(--lift-1);
+  transition:
+    transform 260ms var(--ease),
+    box-shadow 260ms var(--ease);
+}
+.ep:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--lift-2);
+}
+.ep-num {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--amber-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Reveal on scroll ---------- */
+
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(22px);
+}
+[data-reveal].is-in {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 620ms var(--ease),
+    transform 620ms var(--ease);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+/* ---------- Route transition ---------- */
+
+.page {
+  animation: page-in 460ms var(--ease) both;
+}
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+/* ---------- Empty and error states ---------- */
+
+.state {
+  text-align: center;
+  padding: var(--s8) var(--s5);
+  max-width: 46ch;
+  margin: 0 auto;
+}
+.state p {
+  margin-top: var(--s3);
 }
 
 @media (max-width: 640px) {
-  .hero-overlay {
-    padding: var(--s4);
-  }
   .shell {
     padding: 0 var(--s4);
   }
+  .hero {
+    margin-top: var(--s3);
+  }
+  .scroller {
+    grid-auto-columns: minmax(142px, 158px);
+    gap: var(--s4);
+  }
 }
 
+/* Motion is decoration for anyone who has asked it to stop. */
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
   }
   .art img {
     opacity: 1;
