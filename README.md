@@ -419,7 +419,9 @@ the alert below is the one I chose.
 
 ### AI tools, and where I rejected their output
 
-Claude wrote most of this code. The judgment calls worth reporting:
+I used Claude Code throughout. The brief asks where I accepted its output and
+where I did not, and the rejections are the part worth reading, because they are
+where the design decisions actually got made:
 
 - **The `ui-ux-pro-max` design-system tool was wrong three times in a row for
   the viewer, in the same way.** It returned "Dark Mode OLED, cinema dark and
