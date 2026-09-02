@@ -58,23 +58,6 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
-
-      # MinIO speaks the same S3 API Cloudflare R2 does, so the R2 storage
-      # backend runs for real here rather than only being signature-checked.
-      # As a service container it is always up, so the contract test always
-      # executes in CI instead of skipping the way it may do locally.
-      minio:
-        image: bitnami/minio:latest
-        env:
-          MINIO_ROOT_USER: peblo
-          MINIO_ROOT_PASSWORD: peblo-dev-secret
-        ports:
-          - 9000:9000
-        options: >-
-          --health-cmd "mc ready local"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 20
     env:
       DATABASE_URL: postgresql+psycopg://peblo:peblo@localhost:5432/peblo
       TEST_DATABASE_URL: postgresql+psycopg://peblo:peblo@localhost:5432/peblo_test
@@ -91,6 +74,30 @@ jobs:
         working-directory: api
         run: pip install -e ".[dev]"
 
+      # MinIO speaks the same S3 API Cloudflare R2 does, so the R2 storage
+      # backend runs for real here rather than only being signature-checked.
+      #
+      # Started with `docker run` rather than as a service container: the
+      # official image needs a `server /data` command and `services:` cannot
+      # pass one. It is the same image docker-compose uses, so CI and local
+      # development exercise identical code rather than two similar things.
+      - name: Start MinIO
+        run: |
+          docker run -d --name minio -p 9000:9000 \
+            -e MINIO_ROOT_USER=peblo \
+            -e MINIO_ROOT_PASSWORD=peblo-dev-secret \
+            minio/minio:latest server /data
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:9000/minio/health/live >/dev/null; then
+              echo "MinIO ready after ${i} attempt(s)."
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "MinIO never became ready."
+          docker logs minio
+          exit 1
+
       - name: Migrations apply from empty and match the models
         working-directory: api
         # `alembic check` fails if a model changed without a migration, which
@@ -105,10 +112,20 @@ jobs:
 
       - name: The R2 backend must have actually run, not skipped
         working-directory: api
-        # A storage test that silently skips proves nothing. This fails the
-        # build if MinIO was unreachable and the R2 half of the contract was
-        # quietly not exercised.
-        run: pytest tests/test_storage_contract.py -q -k r2 --no-header -rN | tee /dev/stderr | grep -qv "skipped"
+        # A storage test that silently skips proves nothing. This asserts the
+        # R2 half genuinely executed: no skips, and at least one pass.
+        run: |
+          set -o pipefail
+          output=$(pytest tests/test_storage_contract.py -q -k r2 --no-header -rN | tee /dev/stderr)
+          if grep -q "skipped" <<< "$output"; then
+            echo "::error::R2 storage tests skipped. MinIO was unreachable, so the"
+            echo "::error::storage abstraction was never exercised against a real S3 API."
+            exit 1
+          fi
+          if ! grep -qE "[0-9]+ passed" <<< "$output"; then
+            echo "::error::No R2 storage tests ran at all."
+            exit 1
+          fi
 
   build:
     runs-on: ubuntu-latest
@@ -168,28 +185,27 @@ jobs:
       - name: Push images
         run: echo "docker push registry/peblo-{api,cms,viewer}:${{ github.sha }}"
 
-      # 2. Run migrations as a one-off task BEFORE the new API rolls out.
-      #    Migrations must be backward compatible with the currently running
-      #    version, because for a few seconds both versions are live. That
-      #    rules out dropping a column in the same deploy that stops using it:
-      #    it takes two deploys, one to stop reading it and one to drop it.
+      # 2. Migrations run before the rollout, as a one-off task against the
+      #    production database. They must be backward compatible with the
+      #    version still serving traffic, because for the length of the deploy
+      #    both schemas are live at once. That is why additive migrations are
+      #    the rule and a destructive change is split across two releases.
       - name: Migrate
-        run: echo "run-task peblo-api:${{ github.sha }} -- alembic upgrade head"
+        run: echo "run alembic upgrade head as a one-off task"
 
-      # 3. Roll out the API, waiting on /readyz rather than /healthz. Readiness
-      #    proves the pointer resolves to a readable catalogue, so a container
-      #    that cannot serve the viewer never takes traffic.
+      # 3. Roll the API first, waiting on /readyz rather than /healthz.
+      #    /healthz only proves the process is alive; /readyz proves it can
+      #    reach the database and storage and that the catalogue pointer
+      #    resolves, which is the state the viewer actually depends on.
       - name: Deploy API
-        run: echo "deploy peblo-api:${{ github.sha }} --health-check /readyz"
+        run: echo "deploy api, wait for /readyz, then shift traffic"
 
-      # 4. Frontends last, because they are static bundles that call an API
-      #    which must already speak the new shape. Deploying them first would
-      #    put a UI in front of users that the backend cannot yet answer.
+      # 4. Frontends last. They are static bundles that call the API, so
+      #    shipping them first would briefly point new UI at old endpoints.
       - name: Deploy frontends
-        run: echo "deploy peblo-cms and peblo-viewer :${{ github.sha }}"
+        run: echo "sync cms and viewer bundles to the CDN, invalidate cache"
 
-      # 5. Smoke test the thing users actually touch. If the published
-      #    catalogue does not load, the deploy is rolled back rather than left
-      #    for someone to notice.
+      # 5. Prove the deploy rather than assume it: fetch the catalogue and
+      #    check it parses and is non-empty before calling the deploy good.
       - name: Smoke test
-        run: echo "curl -f https://api.peblo.example/readyz && curl -f https://api.peblo.example/catalog"
+        run: echo "curl /readyz and /catalog, assert 200 and a non-empty catalogue"
