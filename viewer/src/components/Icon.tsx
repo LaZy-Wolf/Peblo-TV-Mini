@@ -47,7 +47,7 @@ export function ArchMark({ size = 26 }: { size?: number }) {
     <svg viewBox="0 0 24 26" width={size} height={size} aria-hidden="true">
       <path
         d="M3 25V12a9 9 0 0 1 18 0v13"
-        fill="var(--marigold)"
+        fill="var(--amber)"
         stroke="var(--ink)"
         strokeWidth="2"
         strokeLinejoin="round"

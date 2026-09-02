@@ -34,11 +34,13 @@ services:
       SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-admin-dev-password}
       STORAGE_BACKEND: local
       STORAGE_LOCAL_ROOT: /app/storage_local
-      STORAGE_PUBLIC_BASE_URL: http://localhost:8000/media
+      STORAGE_PUBLIC_BASE_URL: http://localhost:${API_HOST_PORT:-8000}/media
       DATA_DIR: /app/data
-      CORS_ORIGINS: http://localhost:5173,http://localhost:5174
+      CORS_ORIGINS: http://localhost:${CMS_HOST_PORT:-5173},http://localhost:${VIEWER_HOST_PORT:-5174}
+    # Host port is configurable so a machine already running something on
+    # 8000 does not have to stop it to try this project.
     ports:
-      - "8000:8000"
+      - "${API_HOST_PORT:-8000}:8000"
     volumes:
       - artwork:/app/storage_local
 
@@ -47,24 +49,24 @@ services:
       context: .
       dockerfile: cms/Dockerfile
       args:
-        VITE_API_BASE_URL: http://localhost:8000
+        VITE_API_BASE_URL: http://localhost:${API_HOST_PORT:-8000}
     depends_on:
       api:
         condition: service_healthy
     ports:
-      - "5173:80"
+      - "${CMS_HOST_PORT:-5173}:80"
 
   viewer:
     build:
       context: .
       dockerfile: viewer/Dockerfile
       args:
-        VITE_API_BASE_URL: http://localhost:8000
+        VITE_API_BASE_URL: http://localhost:${API_HOST_PORT:-8000}
     depends_on:
       api:
         condition: service_healthy
     ports:
-      - "5174:80"
+      - "${VIEWER_HOST_PORT:-5174}:80"
 
   # Not started by `docker compose up`. It exists so the R2 storage backend
   # can be exercised against a real S3 API rather than only being written.

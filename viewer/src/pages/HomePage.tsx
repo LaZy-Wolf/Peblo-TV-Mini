@@ -55,11 +55,15 @@ export function HomePage() {
   const hero = shows.find((s) => s.slug === catalog.hero?.slug) ?? shows[0];
 
   return (
-    <div className="shell" style={{ paddingBottom: "var(--s6)" }}>
-      <Hero show={hero} />
+    <>
+      <div className="shell">
+        <Hero show={hero} />
+      </div>
+      {/* Rows sit outside the shell because each one is a full-bleed tinted
+          band with its own inner shell. */}
       {catalog.sections.map((section, index) => (
         <Row key={section.key} sectionKey={section.key} shows={section.shows} index={index} />
       ))}
-    </div>
+    </>
   );
 }

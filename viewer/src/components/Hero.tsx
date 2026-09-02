@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import type { CatalogShow } from "../api/catalog";
 import { Art } from "./Art";
+import { Doodles } from "./Doodles";
 import { Icon } from "./Icon";
 
 /**
@@ -21,6 +22,7 @@ export function Hero({ show }: { show: CatalogShow }) {
 
   return (
     <section className="hero">
+      <Doodles />
       <div className="hero-copy">
         <span
           data-reveal=""

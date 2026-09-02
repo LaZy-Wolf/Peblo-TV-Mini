@@ -36,42 +36,48 @@ export function Row({
   }
 
   return (
-    <Reveal as="section" delay={index * 90} style={{ marginTop: "var(--s7)" }}>
-      <div className="row-head">
-        <h2>{heading}</h2>
-        <span className="row-rule" aria-hidden="true" />
-        {shows.length > 3 && (
-          <span className="row-flex" style={{ gap: "var(--s2)" }}>
-            <button
-              className="btn-quiet"
-              style={{ minHeight: 40, padding: "0 var(--s3)" }}
-              onClick={() => nudge(-1)}
-              aria-label={`Scroll ${heading} left`}
-            >
-              <Icon name="back" size={16} />
-            </button>
-            <button
-              className="btn-quiet"
-              style={{ minHeight: 40, padding: "0 var(--s3)" }}
-              onClick={() => nudge(1)}
-              aria-label={`Scroll ${heading} right`}
-            >
-              <Icon name="arrow" size={16} />
-            </button>
-          </span>
-        )}
-      </div>
+    <Reveal
+      as="section"
+      delay={index * 90}
+      className={`band band-${index % 4}`}
+    >
+      <div className="shell">
+        <div className="row-head">
+          <h2>{heading}</h2>
+          <span className="row-rule" aria-hidden="true" />
+          {shows.length > 3 && (
+            <span className="row-flex" style={{ gap: "var(--s2)" }}>
+              <button
+                className="btn-quiet"
+                style={{ minHeight: 40, padding: "0 var(--s3)" }}
+                onClick={() => nudge(-1)}
+                aria-label={`Scroll ${heading} left`}
+              >
+                <Icon name="back" size={16} />
+              </button>
+              <button
+                className="btn-quiet"
+                style={{ minHeight: 40, padding: "0 var(--s3)" }}
+                onClick={() => nudge(1)}
+                aria-label={`Scroll ${heading} right`}
+              >
+                <Icon name="arrow" size={16} />
+              </button>
+            </span>
+          )}
+        </div>
 
-      <div
-        ref={scroller}
-        className="scroller"
-        tabIndex={0}
-        role="group"
-        aria-label={`${heading}, scroll sideways for more`}
-      >
-        {shows.map((show) => (
-          <PosterCard key={show.slug} show={show} />
-        ))}
+        <div
+          ref={scroller}
+          className="scroller"
+          tabIndex={0}
+          role="group"
+          aria-label={`${heading}, scroll sideways for more`}
+        >
+          {shows.map((show) => (
+            <PosterCard key={show.slug} show={show} />
+          ))}
+        </div>
       </div>
     </Reveal>
   );
